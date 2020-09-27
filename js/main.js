@@ -1,6 +1,6 @@
 'use strict';
 
-const TEST_ARRAY_LENGTH = 25;
+const MAX_OBJECTS = 25;
 const MAX_COMMENTS_NUMBER = 6;
 const MIN_LIKES = 15;
 const MAX_LIKES = 200;
@@ -23,9 +23,9 @@ const MESSAGES = [
   `Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.`,
   `Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!`
 ];
-const AVATARS = [];
+const avatars = [];
 for (let i = 1; i <= MAX_COMMENTS_NUMBER; i++) {
-  AVATARS[i - 1] = `img/avatar-` + i + `.svg`;
+  avatars.push(`img/avatar-` + i + `.svg`);
 }
 
 const getRandomFromArray = (array) => {
@@ -47,30 +47,30 @@ const getRandomizedArray = (array) => {
 const createComments = (quantity) => {
   const comments = [];
   for (let i = 0; i < quantity; i++) {
-    let comment = {};
-    comment.avatar = getRandomFromArray(AVATARS);
-    comment.message = getRandomFromArray(MESSAGES);
-    comment.name = getRandomFromArray(NAMES);
-    comments[i] = comment;
+    comments.push({
+      avatar: getRandomFromArray(avatars),
+      message: getRandomFromArray(MESSAGES),
+      name: getRandomFromArray(NAMES)
+    });
   }
   return comments;
 };
 
 let pictureUrls = [];
 const pictureComments = [];
-for (let i = 1; i <= TEST_ARRAY_LENGTH; i++) {
-  pictureUrls[i - 1] = `photos/` + i + `.jpg`;
-  pictureComments[i - 1] = createComments(getRandomFromInterval(1, MAX_COMMENTS_NUMBER));
+for (let i = 1; i <= MAX_OBJECTS; i++) {
+  pictureUrls.push(`photos/` + i + `.jpg`);
+  pictureComments.push(createComments(getRandomFromInterval(1, MAX_COMMENTS_NUMBER)));
 }
 pictureUrls = getRandomizedArray(pictureUrls);
 
 const createPicture = (number) => {
-  let pictureItem = {};
-  pictureItem.url = pictureUrls[number];
-  pictureItem.description = ``;
-  pictureItem.likes = getRandomFromInterval(MIN_LIKES, MAX_LIKES);
-  pictureItem.comments = pictureComments[number];
-  return pictureItem;
+  return {
+    url: pictureUrls[number],
+    description: ``,
+    likes: getRandomFromInterval(MIN_LIKES, MAX_LIKES),
+    comments: pictureComments[number]
+  };
 };
 
 const createTestPictures = (quantity) => {
@@ -81,7 +81,8 @@ const createTestPictures = (quantity) => {
   return testPictures;
 };
 
-const pictures = createTestPictures(TEST_ARRAY_LENGTH);
+const pictures = createTestPictures(MAX_OBJECTS
+);
 
 const picturesList = document.querySelector(`.pictures`);
 
@@ -98,7 +99,7 @@ const renderPicture = (item) => {
 };
 
 const fragment = document.createDocumentFragment();
-for (let i = 0; i < TEST_ARRAY_LENGTH; i++) {
+for (let i = 0; i < MAX_OBJECTS; i++) {
   fragment.appendChild(renderPicture(pictures[i]));
 }
 
