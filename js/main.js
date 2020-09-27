@@ -23,6 +23,8 @@ const MESSAGES = [
   `Я поскользнулся на банановой кожуре и уронил фотоаппарат на кота и у меня получилась фотография лучше.`,
   `Лица у людей на фотке перекошены, как будто их избивают. Как можно было поймать такой неудачный момент?!`
 ];
+const AVATAR_WIDTH = 35;
+const AVATAR_HEIGHT = 35;
 const avatars = [];
 for (let i = 1; i <= MAX_COMMENTS_NUMBER; i++) {
   avatars.push(`img/avatar-` + i + `.svg`);
@@ -42,6 +44,14 @@ const getRandomizedArray = (array) => {
     randomizedArray[i] = array.splice((getRandomFromInterval(0, i)), 1);
   }
   return randomizedArray;
+};
+const makeElement = (tagName, className, text) => {
+  let element = document.createElement(tagName);
+  element.classList.add(className);
+  if (text) {
+    element.textContent = text;
+  }
+  return element;
 };
 
 const createComments = (quantity) => {
@@ -67,7 +77,7 @@ pictureUrls = getRandomizedArray(pictureUrls);
 const createPicture = (number) => {
   return {
     url: pictureUrls[number],
-    description: ``,
+    description: `Это случайное фото`,
     likes: getRandomFromInterval(MIN_LIKES, MAX_LIKES),
     comments: pictureComments[number]
   };
@@ -104,3 +114,36 @@ for (let i = 0; i < MAX_OBJECTS; i++) {
 }
 
 picturesList.appendChild(fragment);
+
+const body = document.querySelector(`body`);
+body.classList.add(`modal-open`);
+
+const bigPicture = document.querySelector(`.big-picture`);
+bigPicture.classList.remove(`hidden`);
+
+bigPicture.querySelector(`.big-picture__img`).querySelector(`img`).src = pictures[0].url;
+bigPicture.querySelector(`.likes-count`).textContent = pictures[0].likes;
+bigPicture.querySelector(`.comments-count`).textContent = pictures[0].comments.length;
+bigPicture.querySelector(`.social__caption`).textContent = pictures[0].description;
+
+const commentCount = bigPicture.querySelector(`.social__comment-count`);
+commentCount.classList.add(`hidden`);
+
+const commentsLoader = bigPicture.querySelector(`.comments-loader`);
+commentsLoader.classList.add(`hidden`);
+
+const socialComments = bigPicture.querySelector(`.social__comments`);
+
+let bigPictureComments = pictures[0].comments;
+for (let i = 0; i < bigPictureComments.length; i++) {
+  let commentItem = makeElement(`li`, `social__comment`);
+  let commentPicture = makeElement(`img`, `social__picture`);
+  commentPicture.src = bigPictureComments[i].avatar;
+  commentPicture.alt = bigPictureComments[i].name;
+  commentPicture.width = AVATAR_WIDTH;
+  commentPicture.height = AVATAR_HEIGHT;
+  commentItem.appendChild(commentPicture);
+  let commentText = makeElement(`p`, `social__text`, bigPictureComments[i].message);
+  commentItem.appendChild(commentText);
+  socialComments.appendChild(commentItem);
+}
