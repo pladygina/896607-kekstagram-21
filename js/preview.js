@@ -4,19 +4,21 @@
   const AVATAR_WIDTH = 35;
   const AVATAR_HEIGHT = 35;
 
-  window.createBigPicture = (element, picture) => {
-    element.querySelector(`.big-picture__img`).querySelector(`img`).src = picture.url;
-    element.querySelector(`.likes-count`).textContent = picture.likes;
-    element.querySelector(`.comments-count`).textContent = picture.comments.length;
-    element.querySelector(`.social__caption`).textContent = picture.description;
+  const bigPicture = document.querySelector(`.big-picture`);
 
-    const commentCount = element.querySelector(`.social__comment-count`);
+  const createBigPicture = (picture) => {
+    bigPicture.querySelector(`.big-picture__img`).querySelector(`img`).src = picture.url;
+    bigPicture.querySelector(`.likes-count`).textContent = picture.likes;
+    bigPicture.querySelector(`.comments-count`).textContent = picture.comments.length;
+    bigPicture.querySelector(`.social__caption`).textContent = picture.description;
+
+    const commentCount = bigPicture.querySelector(`.social__comment-count`);
     commentCount.classList.add(`hidden`);
 
-    const commentsLoader = element.querySelector(`.comments-loader`);
+    const commentsLoader = bigPicture.querySelector(`.comments-loader`);
     commentsLoader.classList.add(`hidden`);
 
-    const socialComments = element.querySelector(`.social__comments`);
+    const socialComments = bigPicture.querySelector(`.social__comments`);
 
     let bigPictureComments = picture.comments;
     for (let i = 0; i < bigPictureComments.length; i++) {
@@ -30,6 +32,18 @@
       let commentText = window.utils.makeElement(`p`, `social__text`, bigPictureComments[i].message);
       commentItem.appendChild(commentText);
       socialComments.appendChild(commentItem);
+    }
+  };
+
+  window.preview = {
+    openBigPicture: (picture) => {
+      window.nodes.body.classList.add(`modal-open`);
+      bigPicture.classList.remove(`hidden`);
+      createBigPicture(picture);
+    },
+    closeBigPicture: () => {
+      window.nodes.body.classList.remove(`modal-open`);
+      bigPicture.classList.add(`hidden`);
     }
   };
 })();

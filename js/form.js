@@ -50,7 +50,6 @@
     }
   ];
 
-  const imgEditingForm = document.querySelector(`.img-upload__form`);
   const imgUploadPreview = document.querySelector(`.img-upload__preview`);
   const scaleControlSmaller = document.querySelector(`.scale__control--smaller`);
   const scaleControlBigger = document.querySelector(`.scale__control--bigger`);
@@ -141,14 +140,14 @@
 
   changeFilter();
 
-  imgEditingForm.addEventListener(`change`, onFilterListChoose);
+  window.nodes.imgEditingForm.addEventListener(`change`, onFilterListChoose);
 
   filterSliderControl.addEventListener(`mouseup`, function () {
     changeFilterDepth();
   });
 
   /* Хэш-теги */
-  const textHashtagsInput = imgEditingForm.querySelector(`.text__hashtags`);
+  const textHashtagsInput = window.nodes.imgEditingForm.querySelector(`.text__hashtags`);
 
   const splitHashtags = (text) => {
     return text.split(HASHTAG_SEPARATOR);

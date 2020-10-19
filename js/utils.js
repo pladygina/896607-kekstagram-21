@@ -1,6 +1,8 @@
 'use strict';
 
 (function () {
+  let number = 100;
+
   window.utils = {
     isEscEvent: (evt, action) => {
       if (evt.key === `Escape`) {
@@ -36,6 +38,19 @@
         randomizedArray[i] = array.splice((window.utils.getRandomFromInterval(0, i)), 1);
       }
       return randomizedArray;
+    },
+    // временно, пока в задании нет пункта по реакции на ошибки
+    errorHandler: (errorMessage) => {
+      let node = document.createElement(`div`);
+      let style = `z-index: ` + number + `; margin: 0 auto; text-align: center; background-color: #da641a;`;
+      node.style = style;
+      node.style.position = `absolute`;
+      node.style.left = 0;
+      node.style.right = 0;
+      node.style.fontSize = `20px`;
+      node.textContent = errorMessage;
+      document.body.insertAdjacentElement(`afterbegin`, node);
+      number++;
     }
   };
 })();
