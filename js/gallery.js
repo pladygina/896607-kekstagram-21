@@ -1,33 +1,25 @@
 'use strict';
 
 (function () {
-  const body = document.querySelector(`body`);
-  const picturesList = document.querySelector(`.pictures`);
+  let pictures = [];
 
-  const pictureTemplate = document.querySelector(`#picture`)
-    .content
-    .querySelector(`.picture`);
-
-  picturesList.appendChild(window.createPicturesListFragment(window.pictures, pictureTemplate));
-
-  const imgEditingForm = document.querySelector(`.img-upload__form`);
-  const uploadFileInput = imgEditingForm.querySelector(`#upload-file`);
-  const uploadOverlay = imgEditingForm.querySelector(`.img-upload__overlay`);
-  const uploadCancel = imgEditingForm.querySelector(`#upload-cancel`);
+  const uploadFileInput = window.nodes.imgEditingForm.querySelector(`#upload-file`);
+  const uploadOverlay = window.nodes.imgEditingForm.querySelector(`.img-upload__overlay`);
+  const uploadCancel = window.nodes.imgEditingForm.querySelector(`#upload-cancel`);
 
   const onUploadEscPress = (evt) => {
     window.utils.isEscEvent(evt, closeUploadOverlay);
   };
 
   const openUploadOverlay = () => {
-    body.classList.add(`modal-open`);
+    window.nodes.body.classList.add(`modal-open`);
     uploadOverlay.classList.remove(`hidden`);
     document.addEventListener(`keydown`, onUploadEscPress);
   };
 
   const closeUploadOverlay = () => {
     uploadFileInput.value = ``;
-    body.classList.remove(`modal-open`);
+    window.nodes.body.classList.remove(`modal-open`);
     uploadOverlay.classList.add(`hidden`);
     document.removeEventListener(`keydown`, onUploadEscPress);
   };
@@ -49,7 +41,7 @@
 
   uploadFileInput.required = false;
 
-  const textHashtagsInput = imgEditingForm.querySelector(`.text__hashtags`);
+  const textHashtagsInput = window.nodes.imgEditingForm.querySelector(`.text__hashtags`);
 
   textHashtagsInput.addEventListener(`focus`, function () {
     document.removeEventListener(`keydown`, onUploadEscPress);
@@ -59,4 +51,13 @@
     document.addEventListener(`keydown`, onUploadEscPress);
   });
 
+  window.gallery = {
+    loadSuccessHandler: (items) => {
+      pictures = items;
+      window.picture.updatePictures(pictures);
+      window.preview.openBigPicture(pictures[0]);
+      /* временно для отладки */
+      window.preview.closeBigPicture();
+    }
+  };
 })();
