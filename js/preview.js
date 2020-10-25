@@ -21,18 +21,19 @@
     const socialComments = bigPicture.querySelector(`.social__comments`);
 
     let bigPictureComments = picture.comments;
-    for (let i = 0; i < bigPictureComments.length; i++) {
+
+    bigPictureComments.forEach((comment) => {
       let commentItem = window.utils.makeElement(`li`, `social__comment`);
       let commentPicture = window.utils.makeElement(`img`, `social__picture`);
-      commentPicture.src = bigPictureComments[i].avatar;
-      commentPicture.alt = bigPictureComments[i].name;
+      commentPicture.src = comment.avatar;
+      commentPicture.alt = comment.name;
       commentPicture.width = AVATAR_WIDTH;
       commentPicture.height = AVATAR_HEIGHT;
       commentItem.appendChild(commentPicture);
-      let commentText = window.utils.makeElement(`p`, `social__text`, bigPictureComments[i].message);
+      let commentText = window.utils.makeElement(`p`, `social__text`, comment.message);
       commentItem.appendChild(commentText);
       socialComments.appendChild(commentItem);
-    }
+    });
   };
 
   window.preview = {

@@ -154,14 +154,14 @@
   };
 
   const checkArrayForRepeat = (array) => {
-    for (let i = array.length - 1; i > 0; i--) {
-      for (let j = i - 1; j >= 0; j--) {
-        if (array[i].toLowerCase() === array[j].toLowerCase()) {
-          return true;
-        }
+    let containsRepeat = false;
+    array.forEach((element, i) => {
+      element = element.toLowerCase();
+      if (array.indexOf(element) !== i) {
+        containsRepeat = true;
       }
-    }
-    return false;
+    });
+    return containsRepeat;
   };
 
   const checkHashtags = () => {

@@ -1,6 +1,7 @@
 'use strict';
 
 (function () {
+  const DEBOUNCE_INTERVAL = 500; // мс
   let number = 100;
 
   window.utils = {
@@ -34,8 +35,9 @@
     },
     getRandomizedArray: (array) => {
       let randomizedArray = [];
+      let arrayCopy = array.slice();
       for (let i = array.length - 1; i >= 0; i--) {
-        randomizedArray[i] = array.splice((window.utils.getRandomFromInterval(0, i)), 1);
+        randomizedArray.push(arrayCopy.splice((window.utils.getRandomFromInterval(0, i)), 1)[0]);
       }
       return randomizedArray;
     },
@@ -51,6 +53,18 @@
       node.textContent = errorMessage;
       document.body.insertAdjacentElement(`afterbegin`, node);
       number++;
+    },
+    debounce: (cb) => {
+      let lastTimeout = null;
+
+      return function (...parameters) {
+        if (lastTimeout) {
+          window.clearTimeout(lastTimeout);
+        }
+        lastTimeout = window.setTimeout(function () {
+          cb(...parameters);
+        }, DEBOUNCE_INTERVAL);
+      };
     }
   };
 })();
