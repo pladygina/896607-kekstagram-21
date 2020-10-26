@@ -1,7 +1,10 @@
 'use strict';
 
 (function () {
+  const RANDOM_IMAGES_QUANTITY = 10;
+
   let pictures = [];
+  let currentPictures = [];
 
   const uploadFileInput = window.nodes.imgEditingForm.querySelector(`#upload-file`);
   const uploadOverlay = window.nodes.imgEditingForm.querySelector(`.img-upload__overlay`);
@@ -38,6 +41,7 @@
 
   /* временно для отладки*/
   openUploadOverlay();
+  closeUploadOverlay();
 
   uploadFileInput.required = false;
 
@@ -51,12 +55,70 @@
     document.addEventListener(`keydown`, onUploadEscPress);
   });
 
+  const imgFilters = document.querySelector(`.img-filters`);
+  const imgFiltersForm = imgFilters.querySelector(`.img-filters__form`);
+  const imgFiltersButton = {
+    default: imgFiltersForm.querySelector(`#filter-default`),
+    random: imgFiltersForm.querySelector(`#filter-random`),
+    discussed: imgFiltersForm.querySelector(`#filter-discussed`)
+  };
+  const onFilterChange = {
+    default: () => {},
+    random: () => {},
+    discussed: () => {}
+  };
+  let currentGalleryFilter = ``;
+
+  const reRenderPictures = window.utils.debounce(function (images) {
+    window.picture.updatePictures(images);
+  });
+
+  const changeFilter = (filter) => {
+    if (currentGalleryFilter === filter && currentGalleryFilter !== `random`) {
+      return;
+    }
+    if (currentGalleryFilter) {
+      imgFiltersButton[currentGalleryFilter].classList.remove(`img-filters__button--active`);
+    } else {
+      imgFiltersButton.default.classList.remove(`img-filters__button--active`);
+    }
+    imgFiltersButton[filter].classList.add(`img-filters__button--active`);
+    currentGalleryFilter = filter;
+    reRenderPictures(currentPictures);
+  };
+
+  onFilterChange.default = () => {
+    currentPictures = pictures;
+    changeFilter(`default`);
+  };
+  onFilterChange.random = () => {
+    currentPictures = (window.utils.getRandomizedArray(pictures)).slice(0, RANDOM_IMAGES_QUANTITY);
+    changeFilter(`random`);
+  };
+  onFilterChange.discussed = () => {
+    currentPictures = (pictures.slice()).sort(function (left, right) {
+      return right.comments.length - left.comments.length;
+    });
+    changeFilter(`discussed`);
+  };
+
+  imgFiltersButton.default.addEventListener(`click`, function () {
+    onFilterChange.default();
+  });
+  imgFiltersButton.random.addEventListener(`click`, function () {
+    onFilterChange.random();
+  });
+  imgFiltersButton.discussed.addEventListener(`click`, function () {
+    onFilterChange.discussed();
+  });
+
   window.gallery = {
-    loadSuccessHandler: (items) => {
-      pictures = items;
+    loadSuccessHandler: (data) => {
+      pictures = data;
       window.picture.updatePictures(pictures);
-      window.preview.openBigPicture(pictures[0]);
+      imgFilters.classList.remove(`img-filters--inactive`);
       /* временно для отладки */
+      window.preview.openBigPicture(pictures[0]);
       window.preview.closeBigPicture();
     }
   };
