@@ -18,6 +18,8 @@
     window.nodes.body.classList.add(`modal-open`);
     uploadOverlay.classList.remove(`hidden`);
     document.addEventListener(`keydown`, onUploadEscPress);
+    window.nodes.picturesList.removeEventListener(`click`, onPicturesListClick);
+    window.nodes.filterSliderControl.addEventListener(`mousedown`, window.form.onMouseDown);
   };
 
   const closeUploadOverlay = () => {
@@ -25,6 +27,8 @@
     window.nodes.body.classList.remove(`modal-open`);
     uploadOverlay.classList.add(`hidden`);
     document.removeEventListener(`keydown`, onUploadEscPress);
+    window.nodes.picturesList.addEventListener(`click`, onPicturesListClick);
+    window.nodes.filterSliderControl.removeEventListener(`mousedown`, window.form.onMouseDown);
   };
 
   uploadFileInput.addEventListener(`change`, function () {
@@ -39,19 +43,21 @@
     window.utils.isEnterEvent(evt, closeUploadOverlay);
   });
 
-  /* временно для отладки*/
-  openUploadOverlay();
-  closeUploadOverlay();
-
+  // до момента реализации загрузки
   uploadFileInput.required = false;
 
-  const textHashtagsInput = window.nodes.imgEditingForm.querySelector(`.text__hashtags`);
-
-  textHashtagsInput.addEventListener(`focus`, function () {
+  window.nodes.textHashtagsInput.addEventListener(`focus`, function () {
     document.removeEventListener(`keydown`, onUploadEscPress);
   });
 
-  textHashtagsInput.addEventListener(`blur`, function () {
+  window.nodes.textHashtagsInput.addEventListener(`blur`, function () {
+    document.addEventListener(`keydown`, onUploadEscPress);
+  });
+
+  window.nodes.imgEditingFormComment.addEventListener(`focus`, function () {
+    document.removeEventListener(`keydown`, onUploadEscPress);
+  });
+  window.nodes.imgEditingFormComment.addEventListener(`blur`, function () {
     document.addEventListener(`keydown`, onUploadEscPress);
   });
 
@@ -62,12 +68,21 @@
     random: imgFiltersForm.querySelector(`#filter-random`),
     discussed: imgFiltersForm.querySelector(`#filter-discussed`)
   };
-  const onFilterChange = {
-    default: () => {},
-    random: () => {},
-    discussed: () => {}
-  };
+
   let currentGalleryFilter = ``;
+
+  const getItemsByFilter = (filterName) => {
+    switch (filterName) {
+      case `random`:
+        return (window.utils.getRandomizedArray(pictures)).slice(0, RANDOM_IMAGES_QUANTITY);
+      case `discussed`:
+        return (pictures.slice()).sort(function (left, right) {
+          return right.comments.length - left.comments.length;
+        });
+      default:
+        return pictures;
+    }
+  };
 
   const reRenderPictures = window.utils.debounce(function (images) {
     window.picture.updatePictures(images);
@@ -87,39 +102,32 @@
     reRenderPictures(currentPictures);
   };
 
-  onFilterChange.default = () => {
-    currentPictures = pictures;
-    changeFilter(`default`);
-  };
-  onFilterChange.random = () => {
-    currentPictures = (window.utils.getRandomizedArray(pictures)).slice(0, RANDOM_IMAGES_QUANTITY);
-    changeFilter(`random`);
-  };
-  onFilterChange.discussed = () => {
-    currentPictures = (pictures.slice()).sort(function (left, right) {
-      return right.comments.length - left.comments.length;
-    });
-    changeFilter(`discussed`);
-  };
+  imgFiltersForm.addEventListener(`click`, function (evt) {
+    let newFilter = `default`;
+    if (evt.target === imgFiltersButton.random) {
+      newFilter = `random`;
+    }
+    if (evt.target === imgFiltersButton.discussed) {
+      newFilter = `discussed`;
+    }
+    currentPictures = getItemsByFilter(newFilter);
+    changeFilter(newFilter);
+  });
 
-  imgFiltersButton.default.addEventListener(`click`, function () {
-    onFilterChange.default();
-  });
-  imgFiltersButton.random.addEventListener(`click`, function () {
-    onFilterChange.random();
-  });
-  imgFiltersButton.discussed.addEventListener(`click`, function () {
-    onFilterChange.discussed();
-  });
+  const onPicturesListClick = (evt) => {
+    let previewNumber = evt.target.closest(`.picture`).dataset.imgNumber;
+    window.preview.openBigPicture(pictures[previewNumber]);
+  };
 
   window.gallery = {
     loadSuccessHandler: (data) => {
       pictures = data;
       window.picture.updatePictures(pictures);
       imgFilters.classList.remove(`img-filters--inactive`);
+      window.nodes.picturesList.addEventListener(`click`, onPicturesListClick);
       /* временно для отладки */
-      window.preview.openBigPicture(pictures[0]);
-      window.preview.closeBigPicture();
+      openUploadOverlay();
+      // closeUploadOverlay();
     }
   };
 })();

@@ -19,13 +19,13 @@
           onLoad(xhr.response);
           return;
         }
-        onError(`Статус ответа: ` + xhr.status + ` ` + xhr.statusText);
+        onError(`Статус ответа: ${xhr.status} ${xhr.statusText}`);
       });
       xhr.addEventListener(`error`, function () {
         onError(`Произошла ошибка соединения`);
       });
       xhr.addEventListener(`timeout`, function () {
-        onError(`Не удалось загрузить фотографии других пользователей за  ` + xhr.timeout + ` мс`);
+        onError(`Не удалось загрузить фотографии других пользователей за ${xhr.timeout} мс`);
       });
 
       xhr.timeout = TIMEOUT_IN_MS;
