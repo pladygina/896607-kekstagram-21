@@ -20,10 +20,10 @@
   };
 
   const openUploadOverlay = () => {
+    window.nodes.picturesList.removeEventListener(`click`, onPicturesListClick);
     window.nodes.body.classList.add(`modal-open`);
     uploadOverlay.classList.remove(`hidden`);
     document.addEventListener(`keydown`, onUploadEscPress);
-    window.nodes.picturesList.removeEventListener(`click`, onPicturesListClick);
     window.nodes.filterSliderControl.addEventListener(`mousedown`, window.form.onMouseDown);
     window.nodes.imgEditingForm.addEventListener(`submit`, submitHandler);
     window.form.clearForm();
@@ -120,8 +120,17 @@
   });
 
   const onPicturesListClick = (evt) => {
-    let previewNumber = evt.target.closest(`.picture`).dataset.imgNumber;
-    window.preview.openBigPicture(pictures[previewNumber]);
+    let closestPicture = evt.target.closest(`.picture`);
+    if (closestPicture) {
+      window.preview.openBigPicture(pictures[closestPicture.dataset.imgNumber]);
+    }
+    /*
+    console.log(evt.target);
+    if (evt.target !== document.querySelector(`.img-upload__label`) &&
+      evt.tagget !== document.querySelector(`.img-upload__start`)) {
+      let previewNumber = evt.target.closest(`.picture`).dataset.imgNumber;
+      window.preview.openBigPicture(pictures[previewNumber]);
+      */
   };
 
   window.gallery = {
