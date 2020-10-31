@@ -6,12 +6,17 @@
   let pictures = [];
   let currentPictures = [];
 
-  const uploadFileInput = window.nodes.imgEditingForm.querySelector(`#upload-file`);
   const uploadOverlay = window.nodes.imgEditingForm.querySelector(`.img-upload__overlay`);
   const uploadCancel = window.nodes.imgEditingForm.querySelector(`#upload-cancel`);
 
   const onUploadEscPress = (evt) => {
     window.utils.isEscEvent(evt, closeUploadOverlay);
+  };
+
+  /* отправка */
+  const submitHandler = (evt) => {
+    window.backend.save(new FormData(window.nodes.imgEditingForm), closeUploadOverlay, window.utils.errorHandler);
+    evt.preventDefault();
   };
 
   const openUploadOverlay = () => {
@@ -20,18 +25,21 @@
     document.addEventListener(`keydown`, onUploadEscPress);
     window.nodes.picturesList.removeEventListener(`click`, onPicturesListClick);
     window.nodes.filterSliderControl.addEventListener(`mousedown`, window.form.onMouseDown);
+    window.nodes.imgEditingForm.addEventListener(`submit`, submitHandler);
+    window.form.clearForm();
   };
 
   const closeUploadOverlay = () => {
-    uploadFileInput.value = ``;
     window.nodes.body.classList.remove(`modal-open`);
     uploadOverlay.classList.add(`hidden`);
     document.removeEventListener(`keydown`, onUploadEscPress);
     window.nodes.picturesList.addEventListener(`click`, onPicturesListClick);
     window.nodes.filterSliderControl.removeEventListener(`mousedown`, window.form.onMouseDown);
+    window.nodes.imgEditingForm.removeEventListener(`submit`, submitHandler);
+    window.form.clearForm();
   };
 
-  uploadFileInput.addEventListener(`change`, function () {
+  window.nodes.uploadFileInput.addEventListener(`change`, function () {
     openUploadOverlay();
   });
 
@@ -42,9 +50,6 @@
   uploadCancel.addEventListener(`keydown`, function (evt) {
     window.utils.isEnterEvent(evt, closeUploadOverlay);
   });
-
-  // до момента реализации загрузки
-  uploadFileInput.required = false;
 
   window.nodes.textHashtagsInput.addEventListener(`focus`, function () {
     document.removeEventListener(`keydown`, onUploadEscPress);
@@ -125,9 +130,6 @@
       window.picture.updatePictures(pictures);
       imgFilters.classList.remove(`img-filters--inactive`);
       window.nodes.picturesList.addEventListener(`click`, onPicturesListClick);
-      /* временно для отладки */
-      openUploadOverlay();
-      // closeUploadOverlay();
     }
   };
 })();

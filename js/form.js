@@ -61,6 +61,7 @@
     imgUploadPreview.querySelector(`img`).style.transform = `scale(` + value + `)`;
     return value;
   };
+  let currentPreviewSize = setPreviewScale(MAX_SCALE);
 
   const changePreviewScale = (evt) => {
     let scaleChanging = 0;
@@ -79,17 +80,6 @@
       scaleControlSmaller.disabled = false;
     }
   };
-
-  let currentPreviewSize = setPreviewScale(1);
-  scaleControlBigger.disabled = true;
-
-  scaleControlSmaller.addEventListener(`click`, function (evt) {
-    changePreviewScale(evt);
-  });
-
-  scaleControlBigger.addEventListener(`click`, function (evt) {
-    changePreviewScale(evt);
-  });
 
   /* уровень эффекта */
   const filterSlider = document.querySelector(`.img-upload__effect-level`);
@@ -250,7 +240,30 @@
     window.nodes.imgEditingFormComment.removeEventListener(`input`, checkComment);
   });
 
+  const clearForm = () => {
+    currentPreviewSize = setPreviewScale(MAX_SCALE);
+    scaleControlBigger.disabled = true;
+
+    scaleControlSmaller.addEventListener(`click`, function (evt) {
+      changePreviewScale(evt);
+    });
+
+    scaleControlBigger.addEventListener(`click`, function (evt) {
+      changePreviewScale(evt);
+    });
+
+    currentFilter = FILTERS[0];
+    onChangeFilter();
+
+    window.nodes.textHashtagsInput.value = ``;
+
+    window.nodes.imgEditingFormComment.value = ``;
+
+    window.nodes.uploadFileInput.value = ``;
+  };
+
   window.form = {
-    onMouseDown
+    onMouseDown,
+    clearForm
   };
 })();
