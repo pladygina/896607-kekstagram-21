@@ -2,7 +2,8 @@
 
 (function () {
   const Url = {
-    LOAD: `https://21.javascript.pages.academy/kekstagram/data`
+    LOAD: `https://21.javascript.pages.academy/kekstagram/data`,
+    SAVE: `https://21.javascript.pages.academy/kekstagram`
   };
   const TIMEOUT_IN_MS = 10000;
   const StatusCode = {
@@ -19,18 +20,40 @@
           onLoad(xhr.response);
           return;
         }
-        onError(`Статус ответа: ` + xhr.status + ` ` + xhr.statusText);
+        onError(`Статус ответа: ${xhr.status} ${xhr.statusText}`);
       });
       xhr.addEventListener(`error`, function () {
         onError(`Произошла ошибка соединения`);
       });
       xhr.addEventListener(`timeout`, function () {
-        onError(`Не удалось загрузить фотографии других пользователей за  ` + xhr.timeout + ` мс`);
+        onError(`Не удалось загрузить фотографии других пользователей за ${xhr.timeout} мс`);
       });
 
       xhr.timeout = TIMEOUT_IN_MS;
       xhr.open(`GET`, Url.LOAD);
       xhr.send();
+    },
+    save: (data, onLoad, onError) => {
+      let xhr = new XMLHttpRequest();
+      xhr.responseType = `json`;
+
+      xhr.addEventListener(`load`, function () {
+        if (xhr.status === StatusCode.OK) {
+          onLoad(xhr.response);
+          return;
+        }
+        onError(`Статус ответа: ${xhr.status} ${xhr.statusText}`);
+      });
+      xhr.addEventListener(`error`, function () {
+        onError(`Произошла ошибка загрузки данных`);
+      });
+      xhr.addEventListener(`timeout`, function () {
+        onError(`Не удалось выполнить отправку данных за ${xhr.timeout} мс`);
+      });
+
+      xhr.timeout = TIMEOUT_IN_MS;
+      xhr.open(`POST`, Url.SAVE);
+      xhr.send(data);
     }
   };
 })();

@@ -6,7 +6,6 @@
   let pictures = [];
   let currentPictures = [];
 
-  const uploadFileInput = window.nodes.imgEditingForm.querySelector(`#upload-file`);
   const uploadOverlay = window.nodes.imgEditingForm.querySelector(`.img-upload__overlay`);
   const uploadCancel = window.nodes.imgEditingForm.querySelector(`#upload-cancel`);
 
@@ -14,20 +13,33 @@
     window.utils.isEscEvent(evt, closeUploadOverlay);
   };
 
+  /* отправка */
+  const submitHandler = (evt) => {
+    window.backend.save(new FormData(window.nodes.imgEditingForm), closeUploadOverlay, window.utils.errorHandler);
+    evt.preventDefault();
+  };
+
   const openUploadOverlay = () => {
+    window.nodes.picturesList.removeEventListener(`click`, onPicturesListClick);
     window.nodes.body.classList.add(`modal-open`);
     uploadOverlay.classList.remove(`hidden`);
     document.addEventListener(`keydown`, onUploadEscPress);
+    window.nodes.filterSliderControl.addEventListener(`mousedown`, window.form.onMouseDown);
+    window.nodes.imgEditingForm.addEventListener(`submit`, submitHandler);
+    window.form.clearForm();
   };
 
   const closeUploadOverlay = () => {
-    uploadFileInput.value = ``;
     window.nodes.body.classList.remove(`modal-open`);
     uploadOverlay.classList.add(`hidden`);
     document.removeEventListener(`keydown`, onUploadEscPress);
+    window.nodes.picturesList.addEventListener(`click`, onPicturesListClick);
+    window.nodes.filterSliderControl.removeEventListener(`mousedown`, window.form.onMouseDown);
+    window.nodes.imgEditingForm.removeEventListener(`submit`, submitHandler);
+    window.form.clearForm();
   };
 
-  uploadFileInput.addEventListener(`change`, function () {
+  window.nodes.uploadFileInput.addEventListener(`change`, function () {
     openUploadOverlay();
   });
 
@@ -39,19 +51,18 @@
     window.utils.isEnterEvent(evt, closeUploadOverlay);
   });
 
-  /* временно для отладки*/
-  openUploadOverlay();
-  closeUploadOverlay();
-
-  uploadFileInput.required = false;
-
-  const textHashtagsInput = window.nodes.imgEditingForm.querySelector(`.text__hashtags`);
-
-  textHashtagsInput.addEventListener(`focus`, function () {
+  window.nodes.textHashtagsInput.addEventListener(`focus`, function () {
     document.removeEventListener(`keydown`, onUploadEscPress);
   });
 
-  textHashtagsInput.addEventListener(`blur`, function () {
+  window.nodes.textHashtagsInput.addEventListener(`blur`, function () {
+    document.addEventListener(`keydown`, onUploadEscPress);
+  });
+
+  window.nodes.imgEditingFormComment.addEventListener(`focus`, function () {
+    document.removeEventListener(`keydown`, onUploadEscPress);
+  });
+  window.nodes.imgEditingFormComment.addEventListener(`blur`, function () {
     document.addEventListener(`keydown`, onUploadEscPress);
   });
 
@@ -62,12 +73,21 @@
     random: imgFiltersForm.querySelector(`#filter-random`),
     discussed: imgFiltersForm.querySelector(`#filter-discussed`)
   };
-  const onFilterChange = {
-    default: () => {},
-    random: () => {},
-    discussed: () => {}
-  };
+
   let currentGalleryFilter = ``;
+
+  const getItemsByFilter = (filterName) => {
+    switch (filterName) {
+      case `random`:
+        return (window.utils.getRandomizedArray(pictures)).slice(0, RANDOM_IMAGES_QUANTITY);
+      case `discussed`:
+        return (pictures.slice()).sort(function (left, right) {
+          return right.comments.length - left.comments.length;
+        });
+      default:
+        return pictures;
+    }
+  };
 
   const reRenderPictures = window.utils.debounce(function (images) {
     window.picture.updatePictures(images);
@@ -87,39 +107,38 @@
     reRenderPictures(currentPictures);
   };
 
-  onFilterChange.default = () => {
-    currentPictures = pictures;
-    changeFilter(`default`);
-  };
-  onFilterChange.random = () => {
-    currentPictures = (window.utils.getRandomizedArray(pictures)).slice(0, RANDOM_IMAGES_QUANTITY);
-    changeFilter(`random`);
-  };
-  onFilterChange.discussed = () => {
-    currentPictures = (pictures.slice()).sort(function (left, right) {
-      return right.comments.length - left.comments.length;
-    });
-    changeFilter(`discussed`);
-  };
+  imgFiltersForm.addEventListener(`click`, function (evt) {
+    let newFilter = `default`;
+    if (evt.target === imgFiltersButton.random) {
+      newFilter = `random`;
+    }
+    if (evt.target === imgFiltersButton.discussed) {
+      newFilter = `discussed`;
+    }
+    currentPictures = getItemsByFilter(newFilter);
+    changeFilter(newFilter);
+  });
 
-  imgFiltersButton.default.addEventListener(`click`, function () {
-    onFilterChange.default();
-  });
-  imgFiltersButton.random.addEventListener(`click`, function () {
-    onFilterChange.random();
-  });
-  imgFiltersButton.discussed.addEventListener(`click`, function () {
-    onFilterChange.discussed();
-  });
+  const onPicturesListClick = (evt) => {
+    let closestPicture = evt.target.closest(`.picture`);
+    if (closestPicture) {
+      window.preview.openBigPicture(pictures[closestPicture.dataset.imgNumber]);
+    }
+    /*
+    console.log(evt.target);
+    if (evt.target !== document.querySelector(`.img-upload__label`) &&
+      evt.tagget !== document.querySelector(`.img-upload__start`)) {
+      let previewNumber = evt.target.closest(`.picture`).dataset.imgNumber;
+      window.preview.openBigPicture(pictures[previewNumber]);
+      */
+  };
 
   window.gallery = {
     loadSuccessHandler: (data) => {
       pictures = data;
       window.picture.updatePictures(pictures);
       imgFilters.classList.remove(`img-filters--inactive`);
-      /* временно для отладки */
-      window.preview.openBigPicture(pictures[0]);
-      window.preview.closeBigPicture();
+      window.nodes.picturesList.addEventListener(`click`, onPicturesListClick);
     }
   };
 })();
