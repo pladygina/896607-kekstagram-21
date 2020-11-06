@@ -5,55 +5,48 @@
     LOAD: `https://21.javascript.pages.academy/kekstagram/data`,
     SAVE: `https://21.javascript.pages.academy/kekstagram`
   };
+  const Method = {
+    LOAD: `GET`,
+    SAVE: `POST`
+  };
   const TIMEOUT_IN_MS = 10000;
   const StatusCode = {
     OK: 200
   };
+  const Action = {
+    LOAD: `load`,
+    SAVE: `save`
+  };
+
+  const transferData = (direction, onLoad, onError, data) => {
+    let xhr = new XMLHttpRequest();
+    xhr.responseType = `json`;
+
+    xhr.addEventListener(`load`, function () {
+      if (xhr.status === StatusCode.OK) {
+        onLoad(xhr.response);
+        return;
+      }
+      onError();
+    });
+    xhr.addEventListener(`error`, onError);
+    xhr.addEventListener(`timeout`, onError);
+
+    xhr.timeout = TIMEOUT_IN_MS;
+    xhr.open(Method[direction.toUpperCase()], Url[direction.toUpperCase()]);
+    if (data) {
+      xhr.send(data);
+      return;
+    }
+    xhr.send();
+  };
 
   window.backend = {
     load: (onLoad, onError) => {
-      let xhr = new XMLHttpRequest();
-      xhr.responseType = `json`;
-
-      xhr.addEventListener(`load`, function () {
-        if (xhr.status === StatusCode.OK) {
-          onLoad(xhr.response);
-          return;
-        }
-        onError(`Статус ответа: ${xhr.status} ${xhr.statusText}`);
-      });
-      xhr.addEventListener(`error`, function () {
-        onError(`Произошла ошибка соединения`);
-      });
-      xhr.addEventListener(`timeout`, function () {
-        onError(`Не удалось загрузить фотографии других пользователей за ${xhr.timeout} мс`);
-      });
-
-      xhr.timeout = TIMEOUT_IN_MS;
-      xhr.open(`GET`, Url.LOAD);
-      xhr.send();
+      transferData(Action.LOAD, onLoad, onError);
     },
     save: (data, onLoad, onError) => {
-      let xhr = new XMLHttpRequest();
-      xhr.responseType = `json`;
-
-      xhr.addEventListener(`load`, function () {
-        if (xhr.status === StatusCode.OK) {
-          onLoad(xhr.response);
-          return;
-        }
-        onError(`Статус ответа: ${xhr.status} ${xhr.statusText}`);
-      });
-      xhr.addEventListener(`error`, function () {
-        onError(`Произошла ошибка загрузки данных`);
-      });
-      xhr.addEventListener(`timeout`, function () {
-        onError(`Не удалось выполнить отправку данных за ${xhr.timeout} мс`);
-      });
-
-      xhr.timeout = TIMEOUT_IN_MS;
-      xhr.open(`POST`, Url.SAVE);
-      xhr.send(data);
+      transferData(Action.SAVE, onLoad, onError, data);
     }
   };
 })();

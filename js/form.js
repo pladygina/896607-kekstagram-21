@@ -1,5 +1,6 @@
 'use strict';
 (function () {
+  const FILE_TYPES = [`gif`, `jpg`, `jpeg`, `png`];
   const MIN_SCALE = 0.25;
   const MAX_SCALE = 1;
   const SCALE_INTERVAL = 0.25;
@@ -51,6 +52,29 @@
     }
   ];
 
+  const filterPreviews = window.nodes.imgEditingForm.querySelectorAll(`.effects__preview`);
+  const changePreview = () => {
+    let previewUrl = window.nodes.imgEditingForm.querySelector(`img`).src;
+    let file = window.nodes.uploadFileInput.files[0];
+    let fileName = file.name.toLowerCase();
+    let matches = FILE_TYPES.some(function (it) {
+      return fileName.endsWith(it);
+    });
+
+    if (matches) {
+      let reader = new FileReader();
+      reader.addEventListener(`load`, function () {
+        previewUrl = reader.result;
+        window.nodes.imgEditingForm.querySelector(`img`).src = previewUrl;
+        filterPreviews.forEach((element) => {
+          element.style.backgroundImage = `url('${previewUrl}')`;
+        });
+      });
+
+      reader.readAsDataURL(file);
+    }
+  };
+
   const imgUploadPreview = document.querySelector(`.img-upload__preview`);
   const scaleControlSmaller = document.querySelector(`.scale__control--smaller`);
   const scaleControlBigger = document.querySelector(`.scale__control--bigger`);
@@ -58,7 +82,7 @@
 
   const setPreviewScale = (value) => {
     scaleControlValue.value = (value * 100) + `%`;
-    imgUploadPreview.querySelector(`img`).style.transform = `scale(` + value + `)`;
+    imgUploadPreview.querySelector(`img`).style.transform = `scale(${value})`;
     return value;
   };
   let currentPreviewSize = setPreviewScale(MAX_SCALE);
@@ -91,7 +115,7 @@
     return (level * 100 + `%`);
   };
   const createFilterScript = (filter, depth) => {
-    return (filter.name + `(` + (depth * (filter.max - filter.min) + filter.min) + filter.measure + `)`);
+    return (`${filter.name}(${(depth * (filter.max - filter.min) + filter.min) + filter.measure})`);
   };
   const calculateMaxDecrease = () => {
     return (window.nodes.filterSliderControl.getBoundingClientRect().x -
@@ -111,7 +135,7 @@
     imgUploadPreview.querySelector(`img`).style.filter = createFilterScript(currentFilter, depth);
   };
   const onChangeFilter = () => {
-    if (currentFilter.value === `none`) {
+    if (currentFilter === FILTERS[0]) {
       filterSlider.classList.add(`hidden`);
       imgUploadPreview.querySelector(`img`).style.filter = ``;
       return;
@@ -122,13 +146,12 @@
   };
   const onFilterListChoose = (evt) => {
     if (evt.target && evt.target.matches(`input[type="radio"]`)) {
-      for (let i = 0; i < FILTERS.length; i++) {
-        if (FILTERS[i].value === evt.target.value) {
-          currentFilter = FILTERS[i];
+      FILTERS.forEach((element) => {
+        if (element.value === evt.target.value) {
+          currentFilter = element;
           onChangeFilter();
-          return;
         }
-      }
+      });
     }
   };
 
@@ -175,9 +198,9 @@
     return text.split(HASHTAG_SEPARATOR);
   };
   const arrayToLowerCase = (array) => {
-    for (let i = 0; i < array.length; i++) {
-      array[i] = array[i].toLowerCase();
-    }
+    array.forEach((element, i) => {
+      array[i] = element.toLowerCase();
+    });
   };
 
   const checkArrayForRepeat = (array) => {
@@ -192,6 +215,7 @@
   };
 
   const checkHashtags = () => {
+    window.nodes.textHashtagsInput.style.outline = `none`;
     let hashtags = splitHashtags(window.nodes.textHashtagsInput.value);
     if (hashtags.length > HASHTAG_MAX_QUANTITY) {
       window.nodes.textHashtagsInput.setCustomValidity(`Максимальное количество хэш-тегов: ${HASHTAG_MAX_QUANTITY}`);
@@ -226,6 +250,7 @@
 
   /* коментарий */
   const checkComment = () => {
+    window.nodes.imgEditingFormComment.style.outline = `none`;
     if (window.nodes.imgEditingFormComment.value.length > TEXT_COMMENT_MAX_LENGTH) {
       window.nodes.imgEditingFormComment.setCustomValidity(`Длина комментария не может быть больше ${TEXT_COMMENT_MAX_LENGTH} символов`);
     }
@@ -241,29 +266,25 @@
   });
 
   const clearForm = () => {
-    currentPreviewSize = setPreviewScale(MAX_SCALE);
-    scaleControlBigger.disabled = true;
-
-    scaleControlSmaller.addEventListener(`click`, function (evt) {
-      changePreviewScale(evt);
-    });
-
-    scaleControlBigger.addEventListener(`click`, function (evt) {
-      changePreviewScale(evt);
-    });
-
     currentFilter = FILTERS[0];
     onChangeFilter();
-
     window.nodes.textHashtagsInput.value = ``;
-
     window.nodes.imgEditingFormComment.value = ``;
-
     window.nodes.uploadFileInput.value = ``;
+    window.nodes.imgEditingForm.querySelector(`.effects__radio`).checked = true;
+  };
+
+  const clearScale = () => {
+    currentPreviewSize = setPreviewScale(MAX_SCALE);
+    scaleControlBigger.disabled = true;
+    scaleControlSmaller.focus();
   };
 
   window.form = {
     onMouseDown,
-    clearForm
+    clearForm,
+    clearScale,
+    changePreviewScale,
+    changePreview
   };
 })();
