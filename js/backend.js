@@ -13,8 +13,8 @@ const StatusCode = {
   OK: 200
 };
 const Action = {
-  LOAD: `load`,
-  SAVE: `save`
+  LOAD: `LOAD`,
+  SAVE: `SAVE`
 };
 
 const transferData = (direction, onLoad, onError, data) => {
@@ -32,7 +32,7 @@ const transferData = (direction, onLoad, onError, data) => {
   xhr.addEventListener(`timeout`, onError);
 
   xhr.timeout = TIMEOUT_IN_MS;
-  xhr.open(Method[direction.toUpperCase()], Url[direction.toUpperCase()]);
+  xhr.open(Method[direction], Url[direction]);
   if (data) {
     xhr.send(data);
     return;
