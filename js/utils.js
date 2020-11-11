@@ -1,10 +1,14 @@
 'use strict';
 
 const DEBOUNCE_INTERVAL = 500; // мс
+const Key = {
+  ENTER: `Enter`,
+  ESCAPE: `Escape`
+};
 
 window.utils = {
   isEscEvent: (evt, action) => {
-    if (evt.key === `Escape`) {
+    if (evt.key === Key.ESCAPE) {
       evt.preventDefault();
       if (action) {
         action();
@@ -12,7 +16,7 @@ window.utils = {
     }
   },
   isEnterEvent: (evt, action) => {
-    if (evt.key === `Enter`) {
+    if (evt.key === Key.ENTER) {
       evt.preventDefault();
       if (action) {
         action();
@@ -20,37 +24,34 @@ window.utils = {
     }
   },
   makeElement: (tagName, className, text) => {
-    let element = document.createElement(tagName);
-    element.classList.add(className);
+    let node = document.createElement(tagName);
+    node.classList.add(className);
     if (text) {
-      element.textContent = text;
+      node.textContent = text;
     }
-    return element;
-  },
-  getRandomFromArray: (array) => {
-    return array[Math.floor(Math.random() * array.length)];
+    return node;
   },
   getRandomFromInterval: (min, max) => {
     let minimum = Math.ceil(min);
     let maximum = Math.floor(max);
     return Math.floor(Math.random() * (maximum - minimum + 1) + minimum);
   },
-  getRandomizedArray: (array) => {
-    let randomizedArray = [];
-    let arrayCopy = array.slice();
-    for (let i = array.length - 1; i >= 0; i--) {
-      randomizedArray.push(arrayCopy.splice((window.utils.getRandomFromInterval(0, i)), 1)[0]);
+  getRandomizedArray: (photos) => {
+    let shuffledPhotos = [];
+    let copyPhotos = photos.slice();
+    for (let i = photos.length - 1; i >= 0; i--) {
+      shuffledPhotos.push(copyPhotos.splice((window.utils.getRandomFromInterval(0, i)), 1)[0]);
     }
-    return randomizedArray;
+    return shuffledPhotos;
   },
   debounce: (cb) => {
     let lastTimeout = null;
 
-    return function (...parameters) {
+    return (...parameters) => {
       if (lastTimeout) {
         window.clearTimeout(lastTimeout);
       }
-      lastTimeout = window.setTimeout(function () {
+      lastTimeout = window.setTimeout(() => {
         cb(...parameters);
       }, DEBOUNCE_INTERVAL);
     };

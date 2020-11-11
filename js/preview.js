@@ -12,6 +12,9 @@ const commentsLoader = window.nodes.bigPicture.querySelector(`.comments-loader`)
 
 let addComments = () => {};
 
+const onExtraCommentButtonClick = () => {
+  addComments();
+};
 const createBigPicture = (picture) => {
   window.nodes.bigPicture.querySelector(`.big-picture__img`).querySelector(`img`).src = picture.url;
   window.nodes.bigPicture.querySelector(`.likes-count`).textContent = picture.likes;
@@ -42,8 +45,8 @@ const createBigPicture = (picture) => {
   };
 
   addComments = () => {
-    let addCount = (commentsShownQuantity + COMMENTS_COUNT_STEP < bigPictureComments.length) ?
-      COMMENTS_COUNT_STEP : bigPictureComments.length - commentsShownQuantity;
+    let maxAdding = bigPictureComments.length - commentsShownQuantity;
+    let addCount = COMMENTS_COUNT_STEP < maxAdding ? COMMENTS_COUNT_STEP : maxAdding;
     for (let i = 0; i < addCount; i++) {
       socialComments.appendChild(createCommentItem(bigPictureComments[commentsShownQuantity + i]));
     }
@@ -51,13 +54,13 @@ const createBigPicture = (picture) => {
     updateCommentsCount();
     if (commentsShownQuantity === bigPictureComments.length) {
       commentsLoader.classList.add(`hidden`);
-      commentsLoader.removeEventListener(`click`, addComments);
+      commentsLoader.removeEventListener(`click`, onExtraCommentButtonClick);
     }
   };
 
   addComments();
 
-  commentsLoader.addEventListener(`click`, addComments);
+  commentsLoader.addEventListener(`click`, onExtraCommentButtonClick);
 };
 
 const onPreviewCancelClick = () => {
@@ -81,6 +84,6 @@ window.preview = {
     window.nodes.bigPicture.classList.add(`hidden`);
     bigPictureCancel.removeEventListener(`click`, onPreviewCancelClick);
     document.removeEventListener(`keydown`, onPreviewEscPress);
-    commentsLoader.removeEventListener(`click`, addComments);
+    commentsLoader.removeEventListener(`click`, onExtraCommentButtonClick);
   }
 };

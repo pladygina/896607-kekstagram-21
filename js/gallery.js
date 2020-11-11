@@ -28,7 +28,7 @@ const galleryFilters = [
   {
     name: `discussed`,
     filter: () => {
-      return (pictures.slice()).sort(function (left, right) {
+      return (pictures.slice()).sort((left, right) => {
         return right.comments.length - left.comments.length;
       });
     },
@@ -44,9 +44,9 @@ const onUploadEscPress = (evt) => {
   window.utils.isEscEvent(evt, closeUploadOverlay);
 };
 
-const checkElementValidity = (element) => {
-  if (!element.validity.valid) {
-    element.style.outline = ERROR_INPUT_STYLE;
+const checkElementValidity = (input) => {
+  if (!input.validity.valid) {
+    input.style.outline = ERROR_INPUT_STYLE;
   }
 };
 const checkFormValidity = () => {
@@ -76,7 +76,8 @@ const openUploadOverlay = () => {
   window.nodes.filterSliderControl.addEventListener(`mousedown`, window.form.onMouseDown);
   submitButton.addEventListener(`click`, checkFormValidity);
   window.nodes.imgEditingForm.addEventListener(`submit`, submitHandler);
-  window.nodes.imgEditingForm.addEventListener(`click`, window.form.changePreviewScale);
+  window.nodes.imgEditingForm.addEventListener(`click`, window.form.onPreviewScaleControlsClick);
+  window.nodes.imgEditingForm.addEventListener(`keydown`, window.form.onPreviewScaleControlsEnterPress);
 };
 
 const closeUploadOverlay = () => {
@@ -88,34 +89,35 @@ const closeUploadOverlay = () => {
   window.nodes.filterSliderControl.removeEventListener(`mousedown`, window.form.onMouseDown);
   submitButton.removeEventListener(`click`, checkFormValidity);
   window.nodes.imgEditingForm.removeEventListener(`submit`, submitHandler);
-  window.form.clearForm();
-  window.nodes.imgEditingForm.removeEventListener(`click`, window.form.changePreviewScale);
+  window.form.clearEditing();
+  window.nodes.imgEditingForm.removeEventListener(`click`, window.form.onPreviewScaleControlsClick);
+  window.nodes.imgEditingForm.removeEventListener(`keydown`, window.form.onPreviewScaleControlsEnterPress);
 };
 
-window.nodes.uploadFileInput.addEventListener(`change`, function () {
+window.nodes.uploadFileInput.addEventListener(`change`, () => {
   openUploadOverlay();
 });
 
-uploadCancel.addEventListener(`click`, function () {
+uploadCancel.addEventListener(`click`, () => {
   closeUploadOverlay();
 });
 
-uploadCancel.addEventListener(`keydown`, function (evt) {
+uploadCancel.addEventListener(`keydown`, (evt) => {
   window.utils.isEnterEvent(evt, closeUploadOverlay);
 });
 
-window.nodes.textHashtagsInput.addEventListener(`focus`, function () {
+window.nodes.textHashtagsInput.addEventListener(`focus`, () => {
   document.removeEventListener(`keydown`, onUploadEscPress);
 });
 
-window.nodes.textHashtagsInput.addEventListener(`blur`, function () {
+window.nodes.textHashtagsInput.addEventListener(`blur`, () => {
   document.addEventListener(`keydown`, onUploadEscPress);
 });
 
-window.nodes.imgEditingFormComment.addEventListener(`focus`, function () {
+window.nodes.imgEditingFormComment.addEventListener(`focus`, () => {
   document.removeEventListener(`keydown`, onUploadEscPress);
 });
-window.nodes.imgEditingFormComment.addEventListener(`blur`, function () {
+window.nodes.imgEditingFormComment.addEventListener(`blur`, () => {
   document.addEventListener(`keydown`, onUploadEscPress);
 });
 
@@ -129,12 +131,12 @@ const imgFiltersButtons = {
 
 let currentGalleryFilter = galleryFilters[0];
 
-const reRenderPictures = window.utils.debounce(function (images) {
-  window.picture.updatePictures(images);
+const reRenderPictures = window.utils.debounce((images) => {
+  window.picture.updateGallery(images);
 });
 
 const changeFilter = (filter) => {
-  if (currentGalleryFilter === filter && currentGalleryFilter.repeat === `false`) {
+  if (currentGalleryFilter === filter && !currentGalleryFilter.repeat) {
     return;
   }
   if (currentGalleryFilter !== filter) {
@@ -146,13 +148,14 @@ const changeFilter = (filter) => {
   reRenderPictures(currentPictures);
 };
 
-imgFiltersForm.addEventListener(`click`, function (evt) {
+imgFiltersForm.addEventListener(`click`, (evt) => {
   let newFilter = galleryFilters[0];
-  galleryFilters.forEach((element) => {
-    if (evt.target === imgFiltersButtons[element.name]) {
-      newFilter = element;
+  for (let i = 0; i < galleryFilters.length; i++) {
+    if (evt.target === imgFiltersButtons[galleryFilters[i].name]) {
+      newFilter = galleryFilters[i];
+      break;
     }
-  });
+  }
   changeFilter(newFilter);
 });
 
@@ -177,7 +180,7 @@ let closePopupButton = ``;
 const closePopup = () => {
   closePopupButton.removeEventListener(`click`, closePopup);
   document.removeEventListener(`keydown`, onPopupEscPress);
-  document.removeEventListener(`click`, outOfPopupClick);
+  document.removeEventListener(`click`, onPopupBackgroundClick);
   window.nodes.body.classList.remove(`modal-open`);
   window.nodes.picturesList.addEventListener(`click`, onPicturesListClick);
   popup.remove();
@@ -185,7 +188,7 @@ const closePopup = () => {
 const onPopupEscPress = (evt) => {
   window.utils.isEscEvent(evt, closePopup);
 };
-const outOfPopupClick = (evt) => {
+const onPopupBackgroundClick = (evt) => {
   if (evt.target === popup) {
     closePopup();
   }
@@ -207,7 +210,7 @@ const saveResultHandler = (saveResult, isLoad) => {
   }
   closePopupButton.addEventListener(`click`, closePopup);
   document.addEventListener(`keydown`, onPopupEscPress);
-  document.addEventListener(`click`, outOfPopupClick);
+  document.addEventListener(`click`, onPopupBackgroundClick);
 };
 
 const saveErrorHandler = () => {
@@ -221,9 +224,9 @@ const loadErrorHandler = () => {
 };
 
 window.gallery = {
-  loadSuccessHandler: (data) => {
-    pictures = data;
-    window.picture.updatePictures(pictures);
+  loadSuccessHandler: (images) => {
+    pictures = images;
+    window.picture.updateGallery(pictures);
     imgFilters.classList.remove(`img-filters--inactive`);
     window.nodes.picturesList.addEventListener(`click`, onPicturesListClick);
   },

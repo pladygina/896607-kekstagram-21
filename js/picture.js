@@ -6,28 +6,28 @@ const pictureTemplate = document.querySelector(`#picture`)
   .content
   .querySelector(`.picture`);
 
-let imagesCurrentQuntity = 0;
+let imagesCurrentQuantity = 0;
 
-const renderPicture = (item, number, template) => {
+const renderPicture = (image, number, template) => {
   let picture = template.cloneNode(true);
   picture.dataset.imgNumber = number;
-  picture.querySelector(`.picture__img`).src = item.url;
-  picture.querySelector(`.picture__likes`).textContent = item.likes;
-  picture.querySelector(`.picture__comments`).textContent = item.comments.length;
+  picture.querySelector(`.picture__img`).src = image.url;
+  picture.querySelector(`.picture__likes`).textContent = image.likes;
+  picture.querySelector(`.picture__comments`).textContent = image.comments.length;
   return picture;
 };
 
 window.picture = {
-  updatePictures: (items) => {
+  updateGallery: (images) => {
     const fragment = document.createDocumentFragment();
-    let imagesNewQuantity = items.length < IMAGES_MAX_QUANTITY ? items.length : IMAGES_MAX_QUANTITY;
-    for (let i = 0; i < imagesCurrentQuntity; i++) {
+    let imagesNewQuantity = images.length < IMAGES_MAX_QUANTITY ? images.length : IMAGES_MAX_QUANTITY;
+    for (let i = 0; i < imagesCurrentQuantity; i++) {
       window.nodes.picturesList.querySelector(`.picture`).remove();
     }
-    items.slice(0, imagesNewQuantity).forEach((item, index) => {
-      fragment.appendChild(renderPicture(item, index, pictureTemplate));
+    images.slice(0, imagesNewQuantity).forEach((image, index) => {
+      fragment.appendChild(renderPicture(image, index, pictureTemplate));
     });
     window.nodes.picturesList.appendChild(fragment);
-    imagesCurrentQuntity = imagesNewQuantity;
+    imagesCurrentQuantity = imagesNewQuantity;
   }
 };

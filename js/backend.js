@@ -17,11 +17,11 @@ const Action = {
   SAVE: `SAVE`
 };
 
-const transferData = (direction, onLoad, onError, data) => {
+const transferData = (direction, onLoad, onError, picture) => {
   let xhr = new XMLHttpRequest();
   xhr.responseType = `json`;
 
-  xhr.addEventListener(`load`, function () {
+  xhr.addEventListener(`load`, () => {
     if (xhr.status === StatusCode.OK) {
       onLoad(xhr.response);
       return;
@@ -33,8 +33,8 @@ const transferData = (direction, onLoad, onError, data) => {
 
   xhr.timeout = TIMEOUT_IN_MS;
   xhr.open(Method[direction], Url[direction]);
-  if (data) {
-    xhr.send(data);
+  if (picture) {
+    xhr.send(picture);
     return;
   }
   xhr.send();
@@ -44,7 +44,7 @@ window.backend = {
   load: (onLoad, onError) => {
     transferData(Action.LOAD, onLoad, onError);
   },
-  save: (data, onLoad, onError) => {
-    transferData(Action.SAVE, onLoad, onError, data);
+  save: (picture, onLoad, onError) => {
+    transferData(Action.SAVE, onLoad, onError, picture);
   }
 };

@@ -13,7 +13,8 @@ const HASHTAG_SEPARATOR = ` `;
 const TEXT_COMMENT_MAX_LENGTH = window.nodes.imgEditingFormComment.maxLength;
 const FILTERS = [
   {
-    value: `none`
+    value: `none`,
+    name: `none`
   },
   {
     value: `chrome`,
@@ -57,17 +58,17 @@ const changePreview = () => {
   let previewUrl = window.nodes.imgEditingForm.querySelector(`img`).src;
   let file = window.nodes.uploadFileInput.files[0];
   let fileName = file.name.toLowerCase();
-  let matches = FILE_TYPES.some(function (it) {
+  let matches = FILE_TYPES.some((it) => {
     return fileName.endsWith(it);
   });
 
   if (matches) {
     let reader = new FileReader();
-    reader.addEventListener(`load`, function () {
+    reader.addEventListener(`load`, () => {
       previewUrl = reader.result;
       window.nodes.imgEditingForm.querySelector(`img`).src = previewUrl;
-      filterPreviews.forEach((element) => {
-        element.style.backgroundImage = `url('${previewUrl}')`;
+      filterPreviews.forEach((preview) => {
+        preview.style.backgroundImage = `url('${previewUrl}')`;
       });
     });
 
@@ -95,14 +96,18 @@ const changePreviewScale = (evt) => {
     scaleChanging = SCALE_INTERVAL;
   }
   currentPreviewSize = setPreviewScale(currentPreviewSize + scaleChanging);
-  if (currentPreviewSize === MIN_SCALE) {
-    scaleControlSmaller.disabled = true;
-  } else if (currentPreviewSize === MAX_SCALE) {
-    scaleControlBigger.disabled = true;
-  } else {
-    scaleControlBigger.disabled = false;
-    scaleControlSmaller.disabled = false;
-  }
+
+  scaleControlSmaller.disabled = currentPreviewSize === MIN_SCALE;
+  scaleControlBigger.disabled = currentPreviewSize === MAX_SCALE;
+};
+const onPreviewScaleControlsClick = (evt) => {
+  changePreviewScale(evt);
+};
+
+const onPreviewScaleControlsEnterPress = (evt) => {
+  window.utils.isEnterEvent(evt, () => {
+    changePreviewScale(evt);
+  });
 };
 
 /* уровень эффекта */
@@ -112,22 +117,23 @@ const filterSliderLine = filterSlider.querySelector(`.effect-level__line`);
 const filterSliderDepth = filterSliderLine.querySelector(`.effect-level__depth`);
 let currentFilter = FILTERS[0];
 const calculatePercent = (level) => {
-  return (level * 100 + `%`);
+  return level * 100 + `%`;
 };
 const createFilterScript = (filter, depth) => {
-  return (`${filter.name}(${(depth * (filter.max - filter.min) + filter.min) + filter.measure})`);
+  return `${filter.name}(${(depth * (filter.max - filter.min) + filter.min) + filter.measure})`;
 };
 const calculateMaxDecrease = () => {
-  return (window.nodes.filterSliderControl.getBoundingClientRect().x -
-    filterSliderLine.getBoundingClientRect().x +
-    window.nodes.filterSliderControl.getBoundingClientRect().width / 2);
+  let controlOffset = window.nodes.filterSliderControl.getBoundingClientRect().x;
+  let lineOffset = filterSliderLine.getBoundingClientRect().x;
+  let controlHalfWidth = window.nodes.filterSliderControl.getBoundingClientRect().width / 2;
+  return controlOffset - lineOffset + controlHalfWidth;
 };
 const calculateMaxIncrease = () => {
-  return (filterSliderLine.getBoundingClientRect().width - calculateMaxDecrease());
+  return filterSliderLine.getBoundingClientRect().width - calculateMaxDecrease();
 };
 const calculateDepthLevel = () => {
-  return (calculateMaxDecrease() /
-  filterSliderLine.getBoundingClientRect().width);
+  return calculateMaxDecrease() /
+  filterSliderLine.getBoundingClientRect().width;
 };
 const renderFilter = (depth) => {
   filterSliderDepth.style.width = calculatePercent(depth);
@@ -135,7 +141,7 @@ const renderFilter = (depth) => {
   imgUploadPreview.querySelector(`img`).style.filter = createFilterScript(currentFilter, depth);
 };
 const onChangeFilter = () => {
-  if (currentFilter === FILTERS[0]) {
+  if (currentFilter.name === FILTERS[0].name) {
     filterSlider.classList.add(`hidden`);
     imgUploadPreview.querySelector(`img`).style.filter = ``;
     return;
@@ -146,9 +152,9 @@ const onChangeFilter = () => {
 };
 const onFilterListChoose = (evt) => {
   if (evt.target && evt.target.matches(`input[type="radio"]`)) {
-    FILTERS.forEach((element) => {
-      if (element.value === evt.target.value) {
-        currentFilter = element;
+    FILTERS.forEach((filter) => {
+      if (filter.value === evt.target.value) {
+        currentFilter = filter;
         onChangeFilter();
       }
     });
@@ -197,21 +203,15 @@ window.nodes.imgEditingForm.addEventListener(`change`, onFilterListChoose);
 const splitHashtags = (text) => {
   return text.split(HASHTAG_SEPARATOR);
 };
-const arrayToLowerCase = (array) => {
-  array.forEach((element, i) => {
-    array[i] = element.toLowerCase();
-  });
-};
 
-const checkArrayForRepeat = (array) => {
-  let containsRepeat = false;
-  arrayToLowerCase(array);
-  array.forEach((element, i) => {
-    if (array.indexOf(element) !== i) {
-      containsRepeat = true;
+const checkArrayForRepeat = (tags) => {
+  for (let i = 0; i < tags.length; i++) {
+    tags[i] = tags[i].toLowerCase();
+    if (tags.indexOf(tags[i]) !== i) {
+      return true;
     }
-  });
-  return containsRepeat;
+  }
+  return false;
 };
 
 const checkHashtags = () => {
@@ -240,11 +240,11 @@ const checkHashtags = () => {
   window.nodes.textHashtagsInput.reportValidity();
 };
 
-window.nodes.textHashtagsInput.addEventListener(`focus`, function () {
+window.nodes.textHashtagsInput.addEventListener(`focus`, () => {
   window.nodes.textHashtagsInput.addEventListener(`input`, checkHashtags);
 });
 
-window.nodes.textHashtagsInput.addEventListener(`blur`, function () {
+window.nodes.textHashtagsInput.addEventListener(`blur`, () => {
   window.nodes.textHashtagsInput.removeEventListener(`input`, checkHashtags);
 });
 
@@ -257,15 +257,15 @@ const checkComment = () => {
   window.nodes.imgEditingFormComment.reportValidity();
 };
 
-window.nodes.imgEditingFormComment.addEventListener(`focus`, function () {
+window.nodes.imgEditingFormComment.addEventListener(`focus`, () => {
   window.nodes.imgEditingFormComment.addEventListener(`input`, checkComment);
 });
 
-window.nodes.imgEditingFormComment.addEventListener(`blur`, function () {
+window.nodes.imgEditingFormComment.addEventListener(`blur`, () => {
   window.nodes.imgEditingFormComment.removeEventListener(`input`, checkComment);
 });
 
-const clearForm = () => {
+const clearEditing = () => {
   currentFilter = FILTERS[0];
   onChangeFilter();
   window.nodes.textHashtagsInput.value = ``;
@@ -282,8 +282,9 @@ const clearScale = () => {
 
 window.form = {
   onMouseDown,
-  clearForm,
+  clearEditing,
   clearScale,
-  changePreviewScale,
+  onPreviewScaleControlsClick,
+  onPreviewScaleControlsEnterPress,
   changePreview
 };
