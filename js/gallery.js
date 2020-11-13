@@ -193,11 +193,13 @@ const onPopupBackgroundClick = (evt) => {
     closePopup();
   }
 };
-const saveResultHandler = (saveResult, isLoad) => {
+const showMessage = (saveResult, isLoad) => {
   let message = popupMessageTemplate[saveResult].cloneNode(true);
+  /*
   if (!isLoad) {
     closeUploadOverlay();
   }
+  */
   main.insertAdjacentElement(`afterbegin`, message);
   window.nodes.body.classList.add(`modal-open`);
   window.nodes.picturesList.removeEventListener(`click`, onPicturesListClick);
@@ -207,6 +209,8 @@ const saveResultHandler = (saveResult, isLoad) => {
   if (isLoad) {
     message.querySelector(`.error__title`).textContent = `Не удалось загрузить фотографии`;
     closePopupButton.textContent = `Понятно`;
+  } else {
+    closeUploadOverlay();
   }
   closePopupButton.addEventListener(`click`, closePopup);
   document.addEventListener(`keydown`, onPopupEscPress);
@@ -214,13 +218,13 @@ const saveResultHandler = (saveResult, isLoad) => {
 };
 
 const saveErrorHandler = () => {
-  saveResultHandler(result.ERROR);
+  showMessage(result.ERROR);
 };
 const saveSuccessHandler = () => {
-  saveResultHandler(result.SUCCESS);
+  showMessage(result.SUCCESS);
 };
 const loadErrorHandler = () => {
-  saveResultHandler(result.ERROR, true);
+  showMessage(result.ERROR, true);
 };
 
 window.gallery = {

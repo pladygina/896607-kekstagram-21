@@ -224,17 +224,14 @@ const checkHashtags = () => {
   } else {
     window.nodes.textHashtagsInput.setCustomValidity(``);
     for (let i = 0; i < hashtags.length; i++) {
-      if (!HASHTAG_PATTERN.test(hashtags[i])) {
-        if (hashtags[i] === ``) {
-          break;
-        } else if (hashtags[i].length < HASHTAG_MIN_LENGTH || hashtags[i].length > HASHTAG_MAX_LENGTH) {
-          window.nodes.textHashtagsInput.setCustomValidity(`Длина хэш-тегов должна быть не менее ${HASHTAG_MIN_LENGTH} и не более ${HASHTAG_MAX_LENGTH} символов`);
-          break;
-        } else {
-          window.nodes.textHashtagsInput.setCustomValidity(`Хэш-тэг начинается с символа # и может содержать только буквы и числа`);
-          break;
-        }
+      if (HASHTAG_PATTERN.test(hashtags[i]) || hashtags[i] === ``) {
+        break;
       }
+      if (hashtags[i].length < HASHTAG_MIN_LENGTH || hashtags[i].length > HASHTAG_MAX_LENGTH) {
+        window.nodes.textHashtagsInput.setCustomValidity(`Длина хэш-тегов должна быть не менее ${HASHTAG_MIN_LENGTH} и не более ${HASHTAG_MAX_LENGTH} символов`);
+        break;
+      }
+      window.nodes.textHashtagsInput.setCustomValidity(`Хэш-тэг начинается с символа # и может содержать только буквы и числа`);
     }
   }
   window.nodes.textHashtagsInput.reportValidity();

@@ -8,19 +8,21 @@ const Key = {
 
 window.utils = {
   isEscEvent: (evt, action) => {
-    if (evt.key === Key.ESCAPE) {
-      evt.preventDefault();
-      if (action) {
-        action();
-      }
+    if (evt.key !== Key.ESCAPE) {
+      return;
+    }
+    evt.preventDefault();
+    if (action) {
+      action();
     }
   },
   isEnterEvent: (evt, action) => {
-    if (evt.key === Key.ENTER) {
-      evt.preventDefault();
-      if (action) {
-        action();
-      }
+    if (evt.key !== Key.ENTER) {
+      return;
+    }
+    evt.preventDefault();
+    if (action) {
+      action();
     }
   },
   makeElement: (tagName, className, text) => {
