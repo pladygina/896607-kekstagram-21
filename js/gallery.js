@@ -60,8 +60,8 @@ const onFormEnterPress = (evt) => {
 };
 
 /* отправка */
-const submitHandler = (evt) => {
-  window.backend.save(new FormData(window.nodes.imgEditingForm), saveSuccessHandler, saveErrorHandler);
+const onFormSubmit = (evt) => {
+  window.backend.save(new FormData(window.nodes.imgEditingForm), onSaveSuccess, onSaveError);
   evt.preventDefault();
 };
 
@@ -75,7 +75,7 @@ const openUploadOverlay = () => {
   document.addEventListener(`keydown`, onFormEnterPress);
   window.nodes.filterSliderControl.addEventListener(`mousedown`, window.form.onMouseDown);
   submitButton.addEventListener(`click`, checkFormValidity);
-  window.nodes.imgEditingForm.addEventListener(`submit`, submitHandler);
+  window.nodes.imgEditingForm.addEventListener(`submit`, onFormSubmit);
   window.nodes.imgEditingForm.addEventListener(`click`, window.form.onPreviewScaleControlsClick);
   window.nodes.imgEditingForm.addEventListener(`keydown`, window.form.onPreviewScaleControlsEnterPress);
 };
@@ -88,7 +88,7 @@ const closeUploadOverlay = () => {
   window.nodes.picturesList.addEventListener(`click`, onPicturesListClick);
   window.nodes.filterSliderControl.removeEventListener(`mousedown`, window.form.onMouseDown);
   submitButton.removeEventListener(`click`, checkFormValidity);
-  window.nodes.imgEditingForm.removeEventListener(`submit`, submitHandler);
+  window.nodes.imgEditingForm.removeEventListener(`submit`, onFormSubmit);
   window.form.clearEditing();
   window.nodes.imgEditingForm.removeEventListener(`click`, window.form.onPreviewScaleControlsClick);
   window.nodes.imgEditingForm.removeEventListener(`keydown`, window.form.onPreviewScaleControlsEnterPress);
@@ -217,22 +217,22 @@ const showMessage = (saveResult, isLoad) => {
   document.addEventListener(`click`, onPopupBackgroundClick);
 };
 
-const saveErrorHandler = () => {
+const onSaveError = () => {
   showMessage(result.ERROR);
 };
-const saveSuccessHandler = () => {
+const onSaveSuccess = () => {
   showMessage(result.SUCCESS);
 };
-const loadErrorHandler = () => {
+const onLoadError = () => {
   showMessage(result.ERROR, true);
 };
 
 window.gallery = {
-  loadSuccessHandler: (images) => {
+  onLoadSuccess: (images) => {
     pictures = images;
     window.picture.updateGallery(pictures);
     imgFilters.classList.remove(`img-filters--inactive`);
     window.nodes.picturesList.addEventListener(`click`, onPicturesListClick);
   },
-  loadErrorHandler
+  onLoadError
 };

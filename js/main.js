@@ -1,4 +1,4 @@
 'use strict';
 
-window.backend.load(window.gallery.loadSuccessHandler, window.gallery.loadErrorHandler);
+window.backend.load(window.gallery.onLoadSuccess, window.gallery.onLoadError);
 
